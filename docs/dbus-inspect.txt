@@ -1,0 +1,234 @@
+# Output by dbus-inspect
+# https://github.com/amenzhinsky/dbus-inspect
+/
+/com
+/com/redhat
+/com/redhat/lvmdbus1
+  org.freedesktop.DBus.Introspectable
+    Methods
+      Introspect() → (arg_0 String)
+  org.freedesktop.DBus.Properties
+    Methods
+      Get(interface_name String, property_name String) → (arg_0 Variant)
+      GetAll(interface_name String) → (arg_0 Dict{String, Variant})
+      Set(interface_name String, property_name String, new_value Variant) → ()
+    Signals
+      PropertiesChanged(interface_name String, changed_properties Dict{String, Variant}, invalidated_properties Array[String])
+  org.freedesktop.DBus.ObjectManager
+    Methods
+      GetManagedObjects() → (arg_0 Dict{Object, Dict{String, Dict{String, Variant}}})
+    Signals
+      InterfacesAdded(object_path Object, int_name_prop_dict Dict{String, Dict{String, Variant}})
+      InterfacesRemoved(object_path Object, interface_list Array[String])
+/com/redhat/lvmdbus1/Job
+/com/redhat/lvmdbus1/Job/0
+  org.freedesktop.DBus.Introspectable
+    Methods
+      Introspect() → (arg_0 String)
+  org.freedesktop.DBus.Properties
+    Methods
+      Get(interface_name String, property_name String) → (arg_0 Variant)
+      GetAll(interface_name String) → (arg_0 Dict{String, Variant})
+      Set(interface_name String, property_name String, new_value Variant) → ()
+    Signals
+      PropertiesChanged(interface_name String, changed_properties Dict{String, Variant}, invalidated_properties Array[String])
+  com.redhat.lvmdbus1.Job
+    Methods
+      Remove() → ()
+      Wait(timeout Int32) → (arg_0 Bool)
+    Properties
+      Percent Double [read]
+      Complete Bool [readwrite]
+      GetError Struct(Int32, String) [read]
+      Result Object [read]
+/com/redhat/lvmdbus1/Manager
+  org.freedesktop.DBus.Introspectable
+    Methods
+      Introspect() → (arg_0 String)
+  org.freedesktop.DBus.Properties
+    Methods
+      Get(interface_name String, property_name String) → (arg_0 Variant)
+      GetAll(interface_name String) → (arg_0 Dict{String, Variant})
+      Set(interface_name String, property_name String, new_value Variant) → ()
+    Signals
+      PropertiesChanged(interface_name String, changed_properties Dict{String, Variant}, invalidated_properties Array[String])
+  com.redhat.lvmdbus1.Manager
+    Methods
+      PvCreate(device String, tmo Int32, create_options Dict{String, Variant}) → (arg_0 Struct(Object, Object))
+      VgCreate(name String, pv_object_paths Array[Object], tmo Int32, create_options Dict{String, Variant}) → (arg_0 Struct(Object, Object))
+      Refresh() → (arg_0 Uint64)
+      FlightRecorderDump() → ()
+      LookUpByLvmId(key String) → (arg_0 Object)
+      UseLvmShell(yes_no Bool) → (arg_0 Bool)
+      ExternalEvent(command String) → (arg_0 Int32)
+      PvScan(activate Bool, cache Bool, device_paths Array[String], major_minors Array[Struct(Int32, Int32)], tmo Int32, scan_options Dict{String, Variant}) → (arg_0 Object)
+    Properties
+      Version String [read]
+/com/redhat/lvmdbus1/Pv
+/com/redhat/lvmdbus1/Pv/0
+  org.freedesktop.DBus.Introspectable
+    Methods
+      Introspect() → (arg_0 String)
+  org.freedesktop.DBus.Properties
+    Methods
+      Get(interface_name String, property_name String) → (arg_0 Variant)
+      GetAll(interface_name String) → (arg_0 Dict{String, Variant})
+      Set(interface_name String, property_name String, new_value Variant) → ()
+    Signals
+      PropertiesChanged(interface_name String, changed_properties Dict{String, Variant}, invalidated_properties Array[String])
+  com.redhat.lvmdbus1.Pv
+    Methods
+      Remove(tmo Int32, remove_options Dict{String, Variant}) → (arg_0 Object)
+      ReSize(new_size_bytes Uint64, tmo Int32, resize_options Dict{String, Variant}) → (arg_0 Object)
+      AllocationEnabled(yes Bool, tmo Int32, allocation_options Dict{String, Variant}) → (arg_0 Object)
+    Properties
+      Tags Array[String] [read]
+      PeSegments Array[Struct(Uint64, Uint64)] [read]
+      Exportable Bool [read]
+      Allocatable Bool [read]
+      Missing Bool [read]
+      Lv Array[Struct(Object, Array[Struct(Uint64, Uint64, String)])] [read]
+      Vg Object [read]
+      PeAllocCount Uint64 [read]
+      PeCount Uint64 [read]
+      PeStart Uint64 [read]
+      BaSizeBytes Uint64 [read]
+      BaStart Uint64 [read]
+      MdaFreeBytes Uint64 [read]
+      MdaSizeBytes Uint64 [read]
+      DevSizeBytes Uint64 [read]
+      UsedBytes Uint64 [read]
+      FreeBytes Uint64 [read]
+      SizeBytes Uint64 [read]
+      Fmt String [read]
+      Name String [read]
+      Uuid String [read]
+/com/redhat/lvmdbus1/Vg
+/com/redhat/lvmdbus1/Vg/0
+  org.freedesktop.DBus.Introspectable
+    Methods
+      Introspect() → (arg_0 String)
+  org.freedesktop.DBus.Properties
+    Methods
+      Get(interface_name String, property_name String) → (arg_0 Variant)
+      GetAll(interface_name String) → (arg_0 Dict{String, Variant})
+      Set(interface_name String, property_name String, new_value Variant) → ()
+    Signals
+      PropertiesChanged(interface_name String, changed_properties Dict{String, Variant}, invalidated_properties Array[String])
+  com.redhat.lvmdbus1.Vg
+    Methods
+      Rename(name String, tmo Int32, rename_options Dict{String, Variant}) → (arg_0 Object)
+      Remove(tmo Int32, remove_options Dict{String, Variant}) → (arg_0 Object)
+      Change(tmo Int32, change_options Dict{String, Variant}) → (arg_0 Object)
+      Reduce(missing Bool, pv_object_paths Array[Object], tmo Int32, reduce_options Dict{String, Variant}) → (arg_0 Object)
+      Extend(pv_object_paths Array[Object], tmo Int32, extend_options Dict{String, Variant}) → (arg_0 Object)
+      Move(pv_src_obj Object, pv_source_range Struct(Uint64, Uint64), pv_dests_and_ranges Array[Struct(Object, Uint64, Uint64)], tmo Int32, move_options Dict{String, Variant}) → (arg_0 Object)
+      LvCreate(name String, size_bytes Uint64, pv_dests_and_ranges Array[Struct(Object, Uint64, Uint64)], tmo Int32, create_options Dict{String, Variant}) → (arg_0 Struct(Object, Object))
+      LvCreateLinear(name String, size_bytes Uint64, thin_pool Bool, tmo Int32, create_options Dict{String, Variant}) → (arg_0 Struct(Object, Object))
+      LvCreateStriped(name String, size_bytes Uint64, num_stripes Uint32, stripe_size_kb Uint32, thin_pool Bool, tmo Int32, create_options Dict{String, Variant}) → (arg_0 Struct(Object, Object))
+      LvCreateMirror(name String, size_bytes Uint64, num_copies Uint32, tmo Int32, create_options Dict{String, Variant}) → (arg_0 Struct(Object, Object))
+      LvCreateRaid(name String, raid_type String, size_bytes Uint64, num_stripes Uint32, stripe_size_kb Uint32, tmo Int32, create_options Dict{String, Variant}) → (arg_0 Struct(Object, Object))
+      CreateCachePool(meta_data_lv Object, data_lv Object, tmo Int32, create_options Dict{String, Variant}) → (arg_0 Struct(Object, Object))
+      CreateThinPool(meta_data_lv Object, data_lv Object, tmo Int32, create_options Dict{String, Variant}) → (arg_0 Struct(Object, Object))
+      PvTagsAdd(pvs Array[Object], tags Array[String], tmo Int32, tag_options Dict{String, Variant}) → (arg_0 Object)
+      PvTagsDel(pvs Array[Object], tags Array[String], tmo Int32, tag_options Dict{String, Variant}) → (arg_0 Object)
+      TagsAdd(tags Array[String], tmo Int32, tag_options Dict{String, Variant}) → (arg_0 Object)
+      TagsDel(tags Array[String], tmo Int32, tag_options Dict{String, Variant}) → (arg_0 Object)
+      AllocationPolicySet(policy String, tmo Int32, policy_options Dict{String, Variant}) → (arg_0 Object)
+      MaxPvSet(number Uint64, tmo Int32, max_options Dict{String, Variant}) → (arg_0 Object)
+      UuidGenerate(tmo Int32, options Dict{String, Variant}) → (arg_0 Object)
+      MaxLvSet(number Uint64, tmo Int32, max_options Dict{String, Variant}) → (arg_0 Object)
+      Activate(control_flags Uint64, tmo Int32, activate_options Dict{String, Variant}) → (arg_0 Object)
+      Deactivate(control_flags Uint64, tmo Int32, activate_options Dict{String, Variant}) → (arg_0 Object)
+    Properties
+      Name String [read]
+      Tags Array[String] [read]
+      Pvs Array[Object] [read]
+      Lvs Array[Object] [read]
+      Writeable Bool [read]
+      Readable Bool [read]
+      Resizeable Bool [read]
+      Exportable Bool [read]
+      Partial Bool [read]
+      AllocContiguous Bool [read]
+      AllocCling Bool [read]
+      AllocNormal Bool [read]
+      AllocAnywhere Bool [read]
+      Clustered Bool [read]
+      MdaUsedCount Uint64 [read]
+      MdaSizeBytes Uint64 [read]
+      MdaFree Uint64 [read]
+      MdaCount Uint64 [read]
+      Seqno Uint64 [read]
+      SnapCount Uint64 [read]
+      LvCount Uint64 [read]
+      PvCount Uint64 [read]
+      MaxPv Uint64 [read]
+      MaxLv Uint64 [read]
+      Profile String [read]
+      FreeCount Uint64 [read]
+      ExtentCount Uint64 [read]
+      ExtentSizeBytes Uint64 [read]
+      SysId String [read]
+      FreeBytes Uint64 [read]
+      SizeBytes Uint64 [read]
+      Fmt String [read]
+      Uuid String [read]
+
+/com/redhat/lvmdbus1/Lv
+/com/redhat/lvmdbus1/Lv/0
+  org.freedesktop.DBus.Introspectable
+    Methods
+      Introspect() → (arg_0 String)
+  org.freedesktop.DBus.Properties
+    Methods
+      Get(interface_name String, property_name String) → (arg_0 Variant)
+      GetAll(interface_name String) → (arg_0 Dict{String, Variant})
+      Set(interface_name String, property_name String, new_value Variant) → ()
+    Signals
+      PropertiesChanged(interface_name String, changed_properties Dict{String, Variant}, invalidated_properties Array[String])
+  com.redhat.lvmdbus1.Lv
+    Methods
+      Remove(tmo Int32, remove_options Dict{String, Variant}) → (arg_0 Object)
+      Rename(name String, tmo Int32, rename_options Dict{String, Variant}) → (arg_0 Object)
+      Move(pv_src_obj Object, pv_source_range Struct(Uint64, Uint64), pv_dests_and_ranges Array[Struct(Object, Uint64, Uint64)], tmo Int32, move_options Dict{String, Variant}) → (arg_0 Object)
+      Snapshot(name String, optional_size Uint64, tmo Int32, snapshot_options Dict{String, Variant}) → (arg_0 Struct(Object, Object))
+      Resize(new_size_bytes Uint64, pv_dests_and_ranges Array[Struct(Object, Uint64, Uint64)], tmo Int32, resize_options Dict{String, Variant}) → (arg_0 Object)
+      Activate(control_flags Uint64, tmo Int32, activate_options Dict{String, Variant}) → (arg_0 Object)
+      Deactivate(control_flags Uint64, tmo Int32, activate_options Dict{String, Variant}) → (arg_0 Object)
+      TagsAdd(tags Array[String], tmo Int32, tag_options Dict{String, Variant}) → (arg_0 Object)
+      TagsDel(tags Array[String], tmo Int32, tag_options Dict{String, Variant}) → (arg_0 Object)
+  com.redhat.lvmdbus1.LvCommon
+    Properties
+      VolumeType Struct(String, String) [read]
+      Permissions Struct(String, String) [read]
+      AllocationPolicy Struct(String, String) [read]
+      FixedMinor Bool [read]
+      State Struct(String, String) [read]
+      TargetType Struct(String, String) [read]
+      ZeroBlocks Bool [read]
+      Health Struct(String, String) [read]
+      SkipActivation Bool [read]
+      Tags Array[String] [read]
+      Roles Array[String] [read]
+      IsThinVolume Bool [read]
+      IsThinPool Bool [read]
+      Active Bool [read]
+      MovePv Object [read]
+      MetaDataSizeBytes Uint64 [read]
+      SyncPercent Uint32 [read]
+      CopyPercent Uint32 [read]
+      MetaDataPercent Uint32 [read]
+      SnapPercent Uint32 [read]
+      DataPercent Uint32 [read]
+      Attr String [read]
+      HiddenLvs Array[Object] [read]
+      Devices Array[Struct(Object, Array[Struct(Uint64, Uint64, String)])] [read]
+      PoolLv Object [read]
+      OriginLv Object [read]
+      Vg Object [read]
+      SegType Array[String] [read]
+      SizeBytes Uint64 [read]
+      Path String [read]
+      Name String [read]
+      Uuid String [read]
