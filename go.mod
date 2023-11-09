@@ -1,4 +1,4 @@
-module lvmclient
+module github.com/m-vinc/lvmclient
 
 go 1.21.3
 

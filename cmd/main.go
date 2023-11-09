@@ -3,7 +3,8 @@ package main
 import (
 	"context"
 	"log"
-	"lvmclient"
+
+	"github.com/m-vinc/lvmclient"
 )
 
 func main() {
