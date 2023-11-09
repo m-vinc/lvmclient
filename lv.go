@@ -104,8 +104,13 @@ func (c *client) GetLogicalVolume(ctx context.Context, params *GetLogicalVolumeP
 		lvPath := dbus.ObjectPath(*params.Identifier)
 		obj := c.conn.Object("com.redhat.lvmdbus1", lvPath)
 		err := obj.CallWithContext(ctx, "org.freedesktop.DBus.Properties.GetAll", 0, "com.redhat.lvmdbus1.LvCommon").Store(&lvMap)
-		if err != nil {
+		notfound := err != nil && err.Error() == errMethodNotFound
+		if err != nil && !notfound {
 			return nil, err
+		}
+
+		if notfound {
+			return nil, ErrLogicalVolumeNotFound
 		}
 
 		err = mapstructure.Decode(lvMap, lv)
@@ -142,9 +147,9 @@ func (c *client) GetLogicalVolume(ctx context.Context, params *GetLogicalVolumeP
 			}
 		}
 
-		return nil, fmt.Errorf("logical volume not found")
+		return nil, ErrLogicalVolumeNotFound
 	}
-	return nil, fmt.Errorf("invalid params, must include Identifier or Name")
+	return nil, ErrInvalidParams
 }
 
 // ToggleLogicalVolume Enable or disable a logical volume. use state to specify the desired state
@@ -167,8 +172,13 @@ func (c *client) ToggleLogicalVolume(ctx context.Context, params *GetLogicalVolu
 	}
 
 	_, err = c.waitFor(ctx, jobPath, int(c.timeout/time.Second))
+	lerr, isLvmError := IsLvmError(err)
 	if err != nil {
 		return false, err
+	}
+
+	if isLvmError {
+		return false, lerr.ToError()
 	}
 
 	return state, nil
@@ -190,8 +200,13 @@ func (c *client) CreateLogicalVolume(ctx context.Context, params *CreateLogicalV
 
 	jobPath := res[1]
 	result, err := c.waitFor(ctx, jobPath.(dbus.ObjectPath), int(c.timeout/time.Second))
-	if err != nil {
+	lerr, isLvmError := IsLvmError(err)
+	if err != nil && !isLvmError {
 		return nil, err
+	}
+
+	if isLvmError {
+		return nil, lerr.ToError()
 	}
 
 	lvPath, ok := result.(dbus.ObjectPath)
@@ -219,8 +234,13 @@ func (c *client) RemoveLogicalVolume(ctx context.Context, params *GetLogicalVolu
 	}
 
 	_, err = c.waitFor(ctx, jobPath, int(c.timeout/time.Second))
+	lerr, isLvmError := IsLvmError(err)
 	if err != nil {
 		return err
+	}
+
+	if isLvmError {
+		return lerr.ToError()
 	}
 
 	return nil
