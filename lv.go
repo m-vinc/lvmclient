@@ -12,23 +12,6 @@ import (
 // Identifier is a custom type we're using to not expose any dbus things
 type Identifier dbus.ObjectPath
 
-// GetLogicalVolumeParams is used to retrieve a volume group. You need to either specify a Identifier or a GetVolumeGroupParams and a Name
-type GetLogicalVolumeParams struct {
-	GetVolumeGroupParams *GetVolumeGroupParams
-	Name                 string
-
-	Identifier *Identifier
-}
-
-// CreateLogicalVolumeParams is used to retrieve a create a new Logical Volume, you need to specify in which volume group with the GetVolumeGroupParams.
-// Size must be in bytes
-type CreateLogicalVolumeParams struct {
-	GetVolumeGroupParams *GetVolumeGroupParams
-
-	Name string
-	Size uint64
-}
-
 type LogicalVolume struct {
 	Identifier Identifier `mapstructure:"-"`
 
@@ -95,12 +78,19 @@ func (c *client) GetLogicalVolumes(ctx context.Context, params *GetVolumeGroupPa
 	return lvs, nil
 }
 
+// GetLogicalVolumeParams is used to retrieve a volume group. You need to either specify a Identifier or a GetVolumeGroupParams and a Name
+type GetLogicalVolumeParams struct {
+	GetVolumeGroupParams *GetVolumeGroupParams
+	Name                 string
+
+	Identifier *Identifier
+}
+
 // GetLogicalVolume get a logical volume by name or by identifier
 func (c *client) GetLogicalVolume(ctx context.Context, params *GetLogicalVolumeParams) (*LogicalVolume, error) {
 	if params.Identifier != nil {
 		lv := &LogicalVolume{}
 		lvMap := map[string]any{}
-
 		lvPath := dbus.ObjectPath(*params.Identifier)
 		obj := c.conn.Object("com.redhat.lvmdbus1", lvPath)
 		err := obj.CallWithContext(ctx, "org.freedesktop.DBus.Properties.GetAll", 0, "com.redhat.lvmdbus1.LvCommon").Store(&lvMap)
@@ -152,15 +142,21 @@ func (c *client) GetLogicalVolume(ctx context.Context, params *GetLogicalVolumeP
 	return nil, ErrInvalidParams
 }
 
+type ToggleLogicalVolumeParams struct {
+	GetLogicalVolumeParams *GetLogicalVolumeParams
+
+	State bool
+}
+
 // ToggleLogicalVolume Enable or disable a logical volume. use state to specify the desired state
-func (c *client) ToggleLogicalVolume(ctx context.Context, params *GetLogicalVolumeParams, state bool) (bool, error) {
-	lv, err := c.GetLogicalVolume(ctx, params)
+func (c *client) ToggleLogicalVolume(ctx context.Context, params *ToggleLogicalVolumeParams) (bool, error) {
+	lv, err := c.GetLogicalVolume(ctx, params.GetLogicalVolumeParams)
 	if err != nil {
 		return false, err
 	}
 
 	method := "Deactivate"
-	if state {
+	if params.State {
 		method = "Activate"
 	}
 
@@ -181,12 +177,22 @@ func (c *client) ToggleLogicalVolume(ctx context.Context, params *GetLogicalVolu
 		return false, lerr.ToError()
 	}
 
-	return state, nil
+	return params.State, nil
+}
+
+// CreateLogicalVolumeParams is used to retrieve a create a new Logical Volume, you need to specify in which volume group with the GetVolumeGroupParams.
+// Size must be in bytes
+type CreateLogicalVolumeParams struct {
+	GetVolumeGroupParams *GetVolumeGroupParams
+
+	Name string
+	Size uint64
 }
 
 // CreateLogicalVolume create a new logical volume into a specific volume group selected by the GetVolumeGroupParams
 func (c *client) CreateLogicalVolume(ctx context.Context, params *CreateLogicalVolumeParams) (*LogicalVolume, error) {
 	vg, err := c.GetVolumeGroup(ctx, params.GetVolumeGroupParams)
+
 	if err != nil {
 		return nil, err
 	}
@@ -217,6 +223,39 @@ func (c *client) CreateLogicalVolume(ctx context.Context, params *CreateLogicalV
 	identifierLvPath := Identifier(lvPath)
 
 	return c.GetLogicalVolume(ctx, &GetLogicalVolumeParams{Identifier: &identifierLvPath})
+}
+
+type ResizeLogicalVolumeParams struct {
+	GetLogicalVolumeParams *GetLogicalVolumeParams
+
+	Size uint64
+}
+
+func (c *client) ResizeLogicalVolume(ctx context.Context, params *ResizeLogicalVolumeParams) (*LogicalVolume, error) {
+	lv, err := c.GetLogicalVolume(ctx, params.GetLogicalVolumeParams)
+	if err != nil {
+		return nil, err
+	}
+
+	var jobPath dbus.ObjectPath
+	// Resize(new_size_bytes Uint64, pv_dests_and_ranges Array[Struct(Object, Uint64, Uint64)], tmo Int32, resize_options Dict{String, Variant}) → (arg_0 Object)
+	obj := c.conn.Object("com.redhat.lvmdbus1", dbus.ObjectPath(lv.Identifier))
+	err = obj.CallWithContext(ctx, "com.redhat.lvmdbus1.Lv.Resize", 0, params.Size, map[string]any{}, 0, map[string]any{}).Store(&jobPath)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = c.waitFor(ctx, jobPath, int(c.timeout/time.Second))
+	lerr, isLvmError := IsLvmError(err)
+	if err != nil && !isLvmError {
+		return nil, err
+	}
+
+	if isLvmError {
+		return lv, lerr.ToError()
+	}
+
+	return c.GetLogicalVolume(ctx, params.GetLogicalVolumeParams)
 }
 
 // RemoveLogicalVolume remove a logical volume either by Name or Identifier

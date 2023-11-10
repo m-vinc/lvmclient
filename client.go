@@ -14,9 +14,10 @@ type Client interface {
 	GetLogicalVolumes(ctx context.Context, params *GetVolumeGroupParams) ([]*LogicalVolume, error)
 
 	GetLogicalVolume(ctx context.Context, params *GetLogicalVolumeParams) (*LogicalVolume, error)
-	ToggleLogicalVolume(ctx context.Context, params *GetLogicalVolumeParams, state bool) (bool, error)
+	ToggleLogicalVolume(ctx context.Context, params *ToggleLogicalVolumeParams) (bool, error)
 
 	CreateLogicalVolume(ctx context.Context, params *CreateLogicalVolumeParams) (*LogicalVolume, error)
+	ResizeLogicalVolume(ctx context.Context, params *ResizeLogicalVolumeParams) (*LogicalVolume, error)
 	RemoveLogicalVolume(ctx context.Context, params *GetLogicalVolumeParams) error
 }
 
@@ -66,12 +67,12 @@ func (c *client) waitFor(ctx context.Context, jobPath dbus.ObjectPath, timeout i
 	}
 
 	message, ok := errMap[1].(string)
-	if err != nil {
+	if !ok {
 		return nil, fmt.Errorf("unable to get error message in job return object")
 	}
 
 	if code != 0 {
-		return nil, fmt.Errorf("%d: %s", code, message)
+		return nil, &JobError{Code: code, Message: message}
 	}
 
 	return jobMap["Result"], nil

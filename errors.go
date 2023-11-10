@@ -16,6 +16,7 @@ var (
 )
 
 var (
+	ErrLogicalVolumeSameSize     = errors.New("logical_volume: already has this size")
 	ErrLogicalVolumeNotFound     = errors.New("logical_volume: not found")
 	ErrLogicalVolumeAlreadyExist = errors.New("logical_volume: already exist")
 )
@@ -71,6 +72,8 @@ func IsLvmError(err error) (*LvmError, bool) {
 
 var (
 	lvmLogicalVolumeAlreadyExist = regexp.MustCompile(`^Logical Volume "(.*)" already exists in volume group "(.*)"`)
+
+	lvmLogicalVolumeSameSize = regexp.MustCompile(`^New size \((.*) extents\) matches existing size \((.*) extents\)`)
 )
 
 type LvmError struct {
@@ -84,6 +87,11 @@ func (lerr *LvmError) ToError() error {
 		if matches := lvmLogicalVolumeAlreadyExist.FindAllStringSubmatch(lerr.Description, -1); matches != nil {
 			return ErrLogicalVolumeAlreadyExist
 		}
+
+		if matches := lvmLogicalVolumeSameSize.FindAllStringSubmatch(lerr.Description, -1); matches != nil {
+			return ErrLogicalVolumeSameSize
+		}
+
 		fallthrough
 	default:
 		return fmt.Errorf("%d - %s", lerr.Code, lerr.Description)
