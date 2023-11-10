@@ -63,8 +63,13 @@ func (c *client) GetLogicalVolumes(ctx context.Context, params *GetVolumeGroupPa
 
 		obj := c.conn.Object("com.redhat.lvmdbus1", dbus.ObjectPath(lvPath))
 		err := obj.CallWithContext(ctx, "org.freedesktop.DBus.Properties.GetAll", 0, "com.redhat.lvmdbus1.LvCommon").Store(&lvMap)
-		if err != nil {
+		notfound := err != nil && err.Error() == errMethodNotFound
+		if err != nil && !notfound {
 			return nil, err
+		}
+
+		if notfound {
+			continue
 		}
 
 		err = mapstructure.Decode(lvMap, lv)
@@ -122,8 +127,13 @@ func (c *client) GetLogicalVolume(ctx context.Context, params *GetLogicalVolumeP
 
 			obj := c.conn.Object("com.redhat.lvmdbus1", dbus.ObjectPath(lvPath))
 			err := obj.CallWithContext(ctx, "org.freedesktop.DBus.Properties.GetAll", 0, "com.redhat.lvmdbus1.LvCommon").Store(&lvMap)
-			if err != nil {
+			notfound := err != nil && err.Error() == errMethodNotFound
+			if err != nil && !notfound {
 				return nil, err
+			}
+
+			if notfound {
+				continue
 			}
 
 			if lvMap["Name"] == params.Name {

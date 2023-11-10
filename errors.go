@@ -16,6 +16,7 @@ var (
 )
 
 var (
+	ErrInsufficientFreeSpace     = errors.New("insufficient free space")
 	ErrLogicalVolumeSameSize     = errors.New("logical_volume: already has this size")
 	ErrLogicalVolumeNotFound     = errors.New("logical_volume: not found")
 	ErrLogicalVolumeAlreadyExist = errors.New("logical_volume: already exist")
@@ -36,7 +37,7 @@ func (je *JobError) Error() string {
 	return fmt.Sprintf("job complete with error. code:%d, message:%s", je.Code, je.Message)
 }
 
-var lvmErrorRegexp = regexp.MustCompile(`\('(.*)', 'Exit code ([0-9]*), stderr =   (.*)\\n'\)`)
+var lvmErrorRegexp = regexp.MustCompile(`\('(.*)', 'Exit code ([0-9]*), stderr =[ *](.*)'\)`)
 
 func IsLvmError(err error) (*LvmError, bool) {
 	if err == nil {
@@ -71,7 +72,9 @@ func IsLvmError(err error) (*LvmError, bool) {
 }
 
 var (
-	lvmLogicalVolumeAlreadyExist = regexp.MustCompile(`^Logical Volume "(.*)" already exists in volume group "(.*)"`)
+	lvmVolumeGroupInsufficientFreeSpace = regexp.MustCompile(`Volume group "(.*)" has insufficient free space \(([0-9]*) extents\): (.*) required\.`)
+	lvmInsufficientFreeSpace            = regexp.MustCompile(`^Insufficient free space: (.*) extents needed, but only (.*) available`)
+	lvmLogicalVolumeAlreadyExist        = regexp.MustCompile(`^Logical Volume "(.*)" already exists in volume group "(.*)"`)
 
 	lvmLogicalVolumeSameSize = regexp.MustCompile(`^New size \((.*) extents\) matches existing size \((.*) extents\)`)
 )
@@ -90,6 +93,14 @@ func (lerr *LvmError) ToError() error {
 
 		if matches := lvmLogicalVolumeSameSize.FindAllStringSubmatch(lerr.Description, -1); matches != nil {
 			return ErrLogicalVolumeSameSize
+		}
+
+		if matches := lvmInsufficientFreeSpace.FindAllStringSubmatch(lerr.Description, -1); matches != nil {
+			return ErrInsufficientFreeSpace
+		}
+
+		if matches := lvmVolumeGroupInsufficientFreeSpace.FindAllStringSubmatch(lerr.Description, -1); matches != nil {
+			return ErrInsufficientFreeSpace
 		}
 
 		fallthrough

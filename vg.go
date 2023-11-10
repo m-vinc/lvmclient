@@ -64,8 +64,13 @@ func (c *client) GetVolumeGroup(ctx context.Context, params *GetVolumeGroupParam
 		objPath := dbus.ObjectPath(*params.Identifier)
 		obj := c.conn.Object("com.redhat.lvmdbus1", objPath)
 		err := obj.CallWithContext(ctx, "org.freedesktop.DBus.Properties.GetAll", 0, "com.redhat.lvmdbus1.Vg").Store(&vgMap)
-		if err != nil {
+		notfound := err != nil && err.Error() == errMethodNotFound
+		if err != nil && !notfound {
 			return nil, err
+		}
+
+		if notfound {
+			return nil, ErrVolumeGroupNotFound
 		}
 
 		err = mapstructure.Decode(vgMap, vg)
@@ -93,8 +98,13 @@ func (c *client) GetVolumeGroup(ctx context.Context, params *GetVolumeGroupParam
 			objPath := dbus.ObjectPath("/com/redhat/lvmdbus1/Vg/" + childNode.Name)
 			obj := c.conn.Object("com.redhat.lvmdbus1", objPath)
 			err := obj.CallWithContext(ctx, "org.freedesktop.DBus.Properties.GetAll", 0, "com.redhat.lvmdbus1.Vg").Store(&vgMap)
-			if err != nil {
+			notfound := err != nil && err.Error() == errMethodNotFound
+			if err != nil && !notfound {
 				return nil, err
+			}
+
+			if notfound {
+				continue
 			}
 
 			if vgMap["Name"] == params.Name {
@@ -135,8 +145,13 @@ func (c *client) GetVolumeGroups(ctx context.Context) ([]*VolumeGroup, error) {
 		objPath := dbus.ObjectPath("/com/redhat/lvmdbus1/Vg/" + childNode.Name)
 		obj := c.conn.Object("com.redhat.lvmdbus1", objPath)
 		err := obj.CallWithContext(ctx, "org.freedesktop.DBus.Properties.GetAll", 0, "com.redhat.lvmdbus1.Vg").Store(&vgMap)
-		if err != nil {
+		notfound := err != nil && err.Error() == errMethodNotFound
+		if err != nil && !notfound {
 			return nil, err
+		}
+
+		if notfound {
+			continue
 		}
 
 		err = mapstructure.Decode(vgMap, vg)
