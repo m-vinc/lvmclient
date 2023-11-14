@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -65,7 +66,7 @@ func IsLvmError(err error) (*LvmError, bool) {
 
 		return &LvmError{
 			Code:        int32(lvmCode),
-			Description: description,
+			Description: strings.TrimSpace(description),
 		}, true
 	}
 	return nil, false
@@ -73,8 +74,8 @@ func IsLvmError(err error) (*LvmError, bool) {
 
 var (
 	lvmVolumeGroupInsufficientFreeSpace = regexp.MustCompile(`Volume group "(.*)" has insufficient free space \(([0-9]*) extents\): (.*) required\.`)
-	lvmInsufficientFreeSpace            = regexp.MustCompile(`^Insufficient free space: (.*) extents needed, but only (.*) available`)
-	lvmLogicalVolumeAlreadyExist        = regexp.MustCompile(`^Logical Volume "(.*)" already exists in volume group "(.*)"`)
+	lvmInsufficientFreeSpace            = regexp.MustCompile(`Insufficient free space: (.*) extents needed, but only (.*) available`)
+	lvmLogicalVolumeAlreadyExist        = regexp.MustCompile(`Logical Volume "(.*)" already exists in volume group "(.*)"`)
 
 	lvmLogicalVolumeSameSize = regexp.MustCompile(`^New size \((.*) extents\) matches existing size \((.*) extents\)`)
 )
